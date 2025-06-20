@@ -20,14 +20,14 @@
             <a href="home.html" class="logo nav-link" data-page="home"><img src="../images/logo-final.png" alt="HaiBanhU Logo"><span>HaiBanhU</span></a>
             <div id="search-container"><i class="fas fa-search"></i><input type="search" id="main-search-bar" placeholder="Tìm kiếm người dùng, kỹ năng..."></div>
             <nav>
-                <a href="/page/home.html" class="nav-item nav-link" data-page="home"><i class="fas fa-home"></i> <span>Trang chủ</span></a>
+                <a href="home.html" class="nav-item nav-link" data-page="home"><i class="fas fa-home"></i> <span>Trang chủ</span></a>
                 <div id="features-menu" class="dropdown">
                     <button id="features-menu-btn" class="nav-menu-toggle"><i class="fas fa-th-large"></i><span>Chức năng</span><i class="fas fa-chevron-down"></i></button>
                     <div id="features-menu-dropdown" class="dropdown-menu hidden">
-                         <a href="/page/projects.html" class="nav-link" data-page="projects"><i class="fas fa-table-columns"></i> Dự án</a>
-                         <a href="/page/automation.html" class="nav-link" data-page="automation"><i class="fas fa-robot"></i> Tự động hóa</a>
-                         <a href="/page/image-studio.html" class="nav-link" data-page="image-studio"><i class="fas fa-palette"></i> Xưởng Ảnh AI</a>
-                         <a href="/page/calendar.html" class="nav-link" data-page="calendar"><i class="fas fa-calendar-alt"></i> Lịch</a>
+                         <a href="projects.html" class="nav-link" data-page="projects"><i class="fas fa-table-columns"></i> Dự án</a>
+                         <a href="automation.html" class="nav-link" data-page="automation"><i class="fas fa-robot"></i> Tự động hóa</a>
+                         <a href="image-studio.html" class="nav-link" data-page="image-studio"><i class="fas fa-palette"></i> Xưởng Ảnh AI</a>
+                         <a href="calendar.html" class="nav-link" data-page="calendar"><i class="fas fa-calendar-alt"></i> Lịch</a>
                     </div>
                 </div>
                 <div id="nav-actions">
@@ -40,8 +40,8 @@
                     <div id="user-menu-dropdown" class="dropdown-menu hidden">
                         <div class="dropdown-header"><span id="dropdown-username"></span><span id="dropdown-email"></span></div>
                         <div class="dropdown-divider"></div>
-                        <a href="/page/profile.html" class="nav-link" data-page="profile"><i class="fas fa-user-circle"></i> Hồ sơ của bạn</a>
-                        <a href="/page/settings.html" class="nav-link" data-page="settings"><i class="fas fa-cog"></i> Cài đặt</a>
+                        <a href="profile.html" class="nav-link" data-page="profile"><i class="fas fa-user-circle"></i> Hồ sơ của bạn</a>
+                        <a href="settings.html" class="nav-link" data-page="settings"><i class="fas fa-cog"></i> Cài đặt</a>
                         <div class="dropdown-divider"></div>
                         <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
                     </div>
@@ -55,7 +55,7 @@
             <div class="page-header-banner"><div class="banner-content"><h2><i class="fa-solid fa-address-card"></i> Hồ sơ của bạn</h2><p>Đây là nơi mọi người nhìn thấy bạn. Hãy tạo một hồ sơ thật ấn tượng!</p></div></div>
             <div class="profile-layout">
                 <aside class="profile-side">
-                    <div class="profile-card profile-side-card"><div class="profile-avatar-section"><input type="file" id="avatar-upload-input" class="file-input" accept="image/*"><label for="avatar-upload-input" class="profile-avatar-wrapper"><img id="profile-avatar-img" src="../images/default-avatar.png" alt="Ảnh đại diện" onerror="this.onerror=null; this.src='../images/default-avatar.png';"><div class="profile-avatar-overlay"><i class="fas fa-camera"></i><span>Thay đổi</span></div></label></div><h2 id="profile-sidebar-name">Tên của bạn</h2><p id="profile-sidebar-title">Chức danh của bạn</p><a href="/page/settings.html" class="btn btn-secondary full-width"><i class="fas fa-cog"></i> Cài đặt tài khoản</a></div>
+                    <div class="profile-card profile-side-card"><div class="profile-avatar-section"><input type="file" id="avatar-upload-input" class="file-input" accept="image/*"><label for="avatar-upload-input" class="profile-avatar-wrapper"><img id="profile-avatar-img" src="../images/default-avatar.png" alt="Ảnh đại diện" onerror="this.onerror=null; this.src='../images/default-avatar.png';"><div class="profile-avatar-overlay"><i class="fas fa-camera"></i><span>Thay đổi</span></div></label></div><h2 id="profile-sidebar-name">Tên của bạn</h2><p id="profile-sidebar-title">Chức danh của bạn</p><a href="settings.html" class="btn btn-secondary full-width"><i class="fas fa-cog"></i> Cài đặt tài khoản</a></div>
                 </aside>
                 <div class="profile-main">
                     <form id="profile-form"><div class="profile-card"><h3>Thông tin chung</h3><div class="profile-main-content"><div class="form-group"><label for="profile-name">Tên hiển thị</label><input type="text" id="profile-name" required></div><div class="form-group"><label for="profile-title">Chức danh/Nghề nghiệp</label><input type="text" id="profile-title" placeholder="Ví dụ: Sinh viên, Lập trình viên..."></div><div class="form-group"><label for="profile-email">Email</label><input type="email" id="profile-email" disabled></div><div class="form-group" style="align-items: flex-start;"><label for="profile-bio">Giới thiệu ngắn (Bio)</label><textarea id="profile-bio" rows="4" placeholder="Một vài dòng giới thiệu về bản thân..."></textarea></div><div class="form-group"><label for="profile-skills">Kỹ năng</label><input type="text" id="profile-skills" placeholder="Phân cách bởi dấu phẩy, ví dụ: JavaScript, React..."></div><div class="form-actions"><button type="submit" class="btn btn-primary">Lưu thay đổi</button></div></div></div></form>
