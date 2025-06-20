@@ -22,11 +22,10 @@ const app = express();
 const server = http.createServer(app);
 
 // THAY THẾ Ở ĐÂY
-// Thay thế `<TÊN-USER-GITHUB-CỦA-BẠN>` bằng username GitHub thực của bạn.
 const allowedOrigins = [
     'http://127.0.0.1:5500', 
     'http://localhost:5500',
-    'https://<HaiBanU>.github.io' 
+    'https://haibanu.github.io' // << ĐÂY LÀ DÒNG ĐÚNG
 ];
 
 const corsOptions = {
