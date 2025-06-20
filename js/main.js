@@ -1,7 +1,7 @@
 // --- File: main.js (Bản cập nhật cuối cùng, sửa lỗi logic render) ---
 
 // Biến chứa địa chỉ server. Sau này khi có địa chỉ thật, chúng ta chỉ cần sửa ở đây.
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'https://haibanhu-server.onrender.com';
 
 const socket = io(API_BASE_URL);
 

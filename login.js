@@ -1,6 +1,6 @@
 // --- START OF FILE login.js --- (PHIÊN BẢN SỬA LỖI ĐIỀU HƯỚNG)
 document.addEventListener('DOMContentLoaded', () => {
-    const API_BASE_URL = 'http://localhost:3000';
+    const API_BASE_URL = 'https://haibanhu-server.onrender.com';
     function showToast(message, type = 'info', duration = 4000) { const container = document.getElementById('toast-container'); if (!container) return; const toast = document.createElement('div'); toast.className = `toast ${type}`; const icons = { success: 'fa-check-circle', error: 'fa-times-circle', info: 'fa-info-circle' }; toast.innerHTML = `<i class="fa-solid ${icons[type]}"></i><span>${message}</span>`; container.appendChild(toast); setTimeout(() => { toast.classList.add('exiting'); toast.addEventListener('animationend', () => toast.remove()); }, duration); }
     function saveSession(data) { localStorage.setItem('haiBanhU_Token', data.token); sessionStorage.setItem('haiBanhU_CurrentUser', JSON.stringify(data.user)); }
     
