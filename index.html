@@ -19,9 +19,9 @@
             const token = localStorage.getItem('haiBanhU_Token');
             const user = sessionStorage.getItem('haiBanhU_CurrentUser');
             if (token && user) {
-                window.location.replace('/page/home.html');
+                window.location.replace('page/home.html');
             } else {
-                window.location.replace('/login.html');
+                window.location.replace('login.html');
             }
         })();
     </script>

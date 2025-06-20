@@ -94,6 +94,16 @@
     opacity: 1;
 }
 
+/* MODIFIED: Thêm style cho nút trong actions */
+.image-result-actions .btn {
+    padding: 8px 16px;
+    font-size: 14px;
+}
+.image-result-actions .btn i {
+    margin-right: 8px;
+}
+
+
 .loading-overlay {
     position: absolute;
     top: 0;

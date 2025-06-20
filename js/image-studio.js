@@ -1,4 +1,4 @@
-// --- START OF FILE js/image-studio.js ---
+// --- START OF FILE js/image-studio.js (ĐÃ CẬP NHẬT) ---
 
 const handleImageGeneration = async (e) => {
     e.preventDefault();
@@ -15,14 +15,13 @@ const handleImageGeneration = async (e) => {
         return;
     }
 
-    // Hiển thị trạng thái đang tải
     submitButton.disabled = true;
     submitButton.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Đang vẽ...`;
     
     const loadingOverlay = document.createElement('div');
     loadingOverlay.className = 'loading-overlay';
     loadingOverlay.innerHTML = '<div class="loader"></div><p>AI đang sáng tạo, vui lòng chờ trong giây lát...</p>';
-    resultContainer.innerHTML = ''; // Xóa placeholder hoặc ảnh cũ
+    resultContainer.innerHTML = '';
     resultContainer.appendChild(loadingOverlay);
 
     try {
@@ -34,7 +33,6 @@ const handleImageGeneration = async (e) => {
             })
         });
 
-        // Xóa overlay và hiển thị ảnh
         loadingOverlay.remove();
         
         const img = document.createElement('img');
@@ -57,10 +55,8 @@ const handleImageGeneration = async (e) => {
 
     } catch (error) {
         showToast(error.message, 'error');
-        // Khôi phục placeholder nếu có lỗi
         resultContainer.innerHTML = `<div class="image-placeholder"><i class="fa-solid fa-image-slash"></i><p>Tạo ảnh thất bại. Vui lòng thử lại.</p></div>`;
     } finally {
-        // Khôi phục lại nút
         submitButton.disabled = false;
         submitButton.innerHTML = `<i class="fas fa-wand-magic-sparkles"></i> Tạo ảnh`;
     }

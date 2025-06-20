@@ -1,4 +1,7 @@
-/* --- START OF FILE common.css --- */
+/* --- START OF FILE common.css (Bản cập nhật đầy đủ) --- */
+
+/* <<< THÊM MỚI: Import font Inter từ Google Fonts >>> */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
     /* 🎯 1. Màu chính (Primary colors) – Xanh dương trung tính */
@@ -16,14 +19,14 @@
     /* Các màu tiện ích được ánh xạ lại */
     --gradient-start: #60A5FA;
     --gradient-end: #3B82F6;
-    --success-color: #10B981; /* Giống màu phụ */
+    --success-color: #10B981;
     --error-color: #EF4444;
-    --info-color: #3B82F6;    /* Giống màu chính */
-    --loop-color: #A78BFA;    /* Giống màu nhấn */
+    --info-color: #3B82F6;
+    --loop-color: #A78BFA;
 
     /* 📄 4. Màu nền (Background & Surface) */
-    --background-color: #F9FAFB;
-    --card-background-color: #FFFFFF;
+    --background-color: #F3F4F6;
+    --card-background-color: rgba(255, 255, 255, 0.85);
 
     /* 🔠 5. Màu chữ (Text) */
     --text-color: #111827;
@@ -34,7 +37,9 @@
     --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
     --shadow-hover: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.05);
     --border-radius: 12px;
-    --font-family: 'Manrope', sans-serif;
+    
+    /* <<< THAY ĐỔI: Sử dụng font Inter >>> */
+    --font-family: 'Inter', sans-serif;
 }
 
 body.dark-mode {
@@ -45,11 +50,10 @@ body.dark-mode {
     --gradient-start: #60A5FA;
     --gradient-end: #2563EB;
     
-    /* Nền và Chữ cho Dark Mode */
     --text-color: #E5E7EB;
     --text-light-color: #9CA3AF;
-    --background-color: #111827;
-    --card-background-color: #1F2937;
+    --background-color: #0d1117; 
+    --card-background-color: rgba(31, 41, 55, 0.85);
     --border-color: #374151;
 }
 
@@ -64,12 +68,47 @@ body.dark-mode {
 @keyframes authBoxFadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 @keyframes node-running-glow { 0% { box-shadow: 0 0 5px var(--info-color), 0 0 10px var(--info-color); } 50% { box-shadow: 0 0 15px var(--info-color), 0 0 25px var(--info-color); } 100% { box-shadow: 0 0 5px var(--info-color), 0 0 10px var(--info-color); } }
 
+@keyframes animated-gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+
 /* ==========================================================================
    GLOBAL & RESET STYLES
    ========================================================================== */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
-body { font-family: var(--font-family); line-height: 1.6; background-color: var(--background-color); color: var(--text-color); transition: background-color 0.3s, color 0.3s; }
+
+body { 
+    font-family: var(--font-family); 
+    line-height: 1.6; 
+    color: var(--text-color); 
+    transition: background-color 0.3s, color 0.3s;
+    
+    background: linear-gradient(-45deg, #2980b9, #6dd5fa, #ffffff, #7f7fd5, #86a8e7, #91eae4, #74ebd5, #acb6e5, #1c92d2, #f2fcfe);
+    background-size: 400% 400%;
+    animation: animated-gradient 30s ease infinite;
+}
+
+body.dark-mode {
+    background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #2980b9, #6dd5fa, #7f7fd5, #86a8e7, #91eae4);
+    background-size: 400% 400%;
+    animation: animated-gradient 30s ease infinite;
+}
+
+body.welcome-active {
+    background: none;
+    background-color: #F9FAFB;
+    animation: none;
+}
+body.dark-mode.welcome-active {
+    background: none;
+    background-color: #111827;
+    animation: none;
+}
+
 body.auth-open { overflow: hidden; }
 
 /* ==========================================================================
@@ -116,7 +155,7 @@ input:disabled, select:disabled, textarea:disabled { background-color: var(--bor
 
 /* --- MODALS --- */
 #modal-backdrop { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1500; background-color: rgba(17, 24, 39, 0.6); backdrop-filter: blur(8px); }
-.modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1600; background: var(--background-color); border: 1px solid var(--border-color); animation: modalFadeIn 0.3s ease-out; border-radius: var(--border-radius); padding: 30px; box-shadow: var(--shadow-hover); max-width: 500px; width: 90%; }
+.modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1600; background: var(--card-background-color); border: 1px solid var(--border-color); animation: modalFadeIn 0.3s ease-out; border-radius: var(--border-radius); padding: 30px; box-shadow: var(--shadow-hover); max-width: 500px; width: 90%; }
 .modal-lg { max-width: 800px; }
 .modal h3 { text-align: center; margin-bottom: 25px; font-size: 1.5rem; }
 .close-modal-btn { position: absolute; top: 15px; right: 15px; font-size: 20px; background: none; border: none; color: var(--text-light-color); cursor: pointer; z-index: 10; line-height: 1; padding: 5px; }
