@@ -10,8 +10,8 @@ const nodemailer = require('nodemailer');
 const axios =require('axios');
 const { OAuth2Client } = require('google-auth-library');
 const { Buffer } = require('buffer');
-const { customAlphabet } = require('nanoid');
-const nanoid = customAlphabet('1234567890abcdef', 8);
+const crypto = require('crypto');
+const nanoid = () => crypto.randomBytes(4).toString('hex');
 const bodyParser = require('body-parser');
 const cheerio = require('cheerio');
 
