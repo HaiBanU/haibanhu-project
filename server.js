@@ -1,4 +1,4 @@
-// --- File: server.js (Bản cập nhật cuối cùng, đơn giản và hiệu quả) ---
+// --- File: server.js (Bản cập nhật cuối cùng, sửa lỗi CORS) ---
 
 require('dotenv').config();
 const mongoose = require('mongoose');
@@ -10,8 +10,7 @@ const nodemailer = require('nodemailer');
 const axios =require('axios');
 const { OAuth2Client } = require('google-auth-library');
 const { Buffer } = require('buffer');
-const crypto = require('crypto');
-const nanoid = () => crypto.randomBytes(4).toString('hex');
+const { nanoid } = require('nanoid');
 const bodyParser = require('body-parser');
 const cheerio = require('cheerio');
 
@@ -21,29 +20,38 @@ const { Server } = require("socket.io");
 const app = express();
 const server = http.createServer(app);
 
-// THAY THẾ Ở ĐÂY
+// <<< THAY ĐỔI 1: TẠO DANH SÁCH CÁC ĐỊA CHỈ ĐƯỢC PHÉP TRUY CẬP (GUEST LIST) >>>
+// Chúng ta thêm địa chỉ trang web trên GitHub Pages vào đây.
 const allowedOrigins = [
-    'http://127.0.0.1:5500', 
-    'http://localhost:5500',
-    'https://haibanu.github.io' // << ĐÂY LÀ DÒNG ĐÚNG
+    "http://localhost:3000",
+    "https://haibanu.github.io"
 ];
 
+// <<< THAY ĐỔI 2: CẤU HÌNH CORS CHI TIẾT CHO EXPRESS >>>
+// Đoạn này sẽ kiểm tra xem yêu cầu có đến từ một trong các địa chỉ trong allowedOrigins không.
 const corsOptions = {
     origin: function (origin, callback) {
         if (!origin || allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
-            callback(new Error('Not allowed by CORS'));
+            callback(new Error('Địa chỉ của bạn không được phép truy cập bởi chính sách CORS.'));
         }
-    },
-    methods: ["GET", "POST", "PUT", "DELETE"]
+    }
 };
 
+const io = new Server(server, {
+    // <<< THAY ĐỔI 3: ÁP DỤNG DANH SÁCH ĐỊA CHỈ CHO SOCKET.IO >>>
+    // Thay vì cho phép tất cả (*), chúng ta chỉ cho phép các địa chỉ trong danh sách.
+    cors: {
+        origin: allowedOrigins, 
+        methods: ["GET", "POST", "PUT", "DELETE"]
+    }
+});
+
+// <<< THAY ĐỔI 4: ÁP DỤNG CẤU HÌNH CORS CHO EXPRESS >>>
+// Thay thế app.use(cors()) cũ bằng dòng này.
 app.use(cors(corsOptions));
 
-const io = new Server(server, {
-    cors: corsOptions
-});
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static(path.join(__dirname)));
@@ -230,18 +238,14 @@ app.put('/api/user', authenticateToken, async (req, res) => {
 });
 
 
-// <<< START SỬA LỖI & CẬP NHẬT: Xóa bỏ populate không cần thiết >>>
 app.get('/api/users', authenticateToken, async (req, res) => {
     try {
-        // Lấy dữ liệu người dùng "thô", không populate comment author
         const users = await User.find({});
-        res.json(users.map(u => u.toJSON())); // Không cần sanitize nữa vì không có dữ liệu nhị phân
+        res.json(users.map(u => u.toJSON())); 
     } catch (error) {
         res.status(500).json({ message: "Lỗi server khi lấy danh sách người dùng." });
     }
 });
-// <<< END SỬA LỖI & CẬP NHẬT >>>
-
 
 app.post('/api/user/connect/google', authenticateToken, async (req, res) => { try { const { code } = req.body; if (!code) { return res.status(400).json({ message: 'Không nhận được mã code từ frontend.' }); } const user = await User.findById(req.user.userId); if (!user) { return res.status(404).json({ message: 'Không tìm thấy người dùng.' }); } const { tokens } = await googleClient.getToken(code); const ticket = await googleClient.verifyIdToken({ idToken: tokens.id_token, audience: GOOGLE_CLIENT_ID, }); const payload = ticket.getPayload(); const googleEmail = payload.email; const existingLink = await User.findOne({ "email": googleEmail }); if (existingLink && existingLink.id.toString() !== user.id.toString()) { return res.status(409).json({ message: 'Email Google này đã được liên kết với một tài khoản khác.' }); } if (!user.connections) user.connections = {}; user.connections.gmail = { name: googleEmail, connected: true, appPassword: user.connections.gmail?.appPassword || null, }; if (!user.email) { user.email = googleEmail; } await user.save(); res.status(200).json({ message: 'Liên kết Google thành công!', user: sanitizeUserForSession(user.toJSON()) }); } catch(error) { console.error("Lỗi liên kết Google:", error.response ? error.response.data : error.message); res.status(500).json({ message: 'Liên kết Google thất bại. Vui lòng kiểm tra log server.' }); }});
 app.post('/api/user/disconnect/google', authenticateToken, async (req, res) => { try { const user = await User.findById(req.user.userId); if (!user) { return res.status(404).json({ message: "Không tìm thấy người dùng." }); } if (user.connections && user.connections.gmail) { user.connections.gmail = undefined; } const updatedUser = await user.save(); res.status(200).json({ message: "Đã hủy liên kết Google thành công.", user: sanitizeUserForSession(updatedUser.toJSON()) }); } catch (error) { res.status(500).json({ message: "Lỗi server khi hủy liên kết." }); } });
