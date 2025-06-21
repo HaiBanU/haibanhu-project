@@ -152,7 +152,6 @@ function renderProjectFeed() {
     const container = document.getElementById('project-feed-list');
     if (!container) return;
 
-    // Lọc ra các dự án có bình luận
     const projectsWithComments = (currentUser.projects || [])
         .map(p => ({
             ...p,
@@ -166,7 +165,6 @@ function renderProjectFeed() {
         return;
     }
     
-    // Thay đổi layout của container
     container.style.display = 'grid';
     container.style.gridTemplateColumns = 'repeat(auto-fit, minmax(350px, 1fr))';
     container.style.gap = '20px';
@@ -177,7 +175,7 @@ function renderProjectFeed() {
         projectCard.className = 'project-feed-card';
 
         let commentsHTML = '';
-        const recentComments = project.comments.slice(0, 3); // Chỉ lấy 3 bình luận gần nhất
+        const recentComments = project.comments.slice(0, 3); 
 
         recentComments.forEach(comment => {
             const author = findUserById(comment.author);
@@ -216,8 +214,9 @@ function renderProjectFeed() {
                 </div>`;
         });
         
+        // <<< SỬA LỖI ĐIỀU HƯỚNG TẠI ĐÂY >>>
         projectCard.innerHTML = `
-            <a href="/page/projects.html?viewProject=${project.id}" class="project-feed-card-header">
+            <a href="projects.html?viewProject=${project.id}" class="project-feed-card-header">
                 <h3>${project.name}</h3>
                 <i class="fas fa-arrow-right"></i>
             </a>

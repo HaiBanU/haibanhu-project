@@ -1,6 +1,6 @@
 // --- File: main.js (Bản cập nhật đầy đủ, sửa lỗi logic render) ---
 
-const SERVER_URL = 'https://haibanhu-server.onrender.com'; // <--- THAY ĐỊA CHỈ SERVER RENDER CỦA BẠN VÀO ĐÂY
+const SERVER_URL = 'https://haibanu-server.onrender.com'; // <--- THAY ĐỊA CHỈ SERVER RENDER CỦA BẠN VÀO ĐÂY
 const socket = io(SERVER_URL);
 
 // --- GLOBAL STATE & CONFIG ---
@@ -11,7 +11,6 @@ let currentWorkflowId = null;
 let currentColumnStatus = null;
 let lastFocusedInput = null;
 let eventCheckInterval = null;
-
 const notificationSound = new Audio('../audio/notification.mp3');
 
 // --- ELEMENT SELECTORS (SHARED) ---

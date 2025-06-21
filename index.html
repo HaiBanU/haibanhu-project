@@ -9,22 +9,26 @@
         p { margin-top: 20px; font-size: 1rem; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
-    <script>
-        (function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const inviteCode = urlParams.get('joinProject');
-            if (inviteCode) {
-                sessionStorage.setItem('pendingProjectInvite', inviteCode);
-            }
-            const token = localStorage.getItem('haiBanhU_Token');
-            const user = sessionStorage.getItem('haiBanhU_CurrentUser');
-            if (token && user) {
-                window.location.replace('page/home.html');
-            } else {
-                window.location.replace('login.html');
-            }
-        })();
-    </script>
+   <script>
+    (function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const inviteCode = urlParams.get('joinProject');
+        if (inviteCode) {
+            sessionStorage.setItem('pendingProjectInvite', inviteCode);
+        }
+        const token = localStorage.getItem('haiBanhU_Token');
+        const user = sessionStorage.getItem('haiBanhU_CurrentUser');
+
+        // <<< SỬA LỖI ĐIỀU HƯỚNG TẠI ĐÂY >>>
+        if (token && user) {
+            // Dùng đường dẫn tương đối
+            window.location.replace('page/home.html');
+        } else {
+            // Dùng đường dẫn tương đối
+            window.location.replace('login.html');
+        }
+    })();
+</script>
 </head>
 <body>
     <div class="loader"></div>
