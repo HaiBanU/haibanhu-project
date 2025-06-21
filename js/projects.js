@@ -1,4 +1,4 @@
-// --- File: projects.js (Bản cập nhật cuối cùng, giải quyết triệt để) ---
+// --- File: projects.js (Bản cập nhật đầy đủ, giải quyết triệt để) ---
 
 let projectChartInstance = null;
 let projectCalendarInstance = null;
@@ -172,7 +172,7 @@ function showDashboardView() {
     if (projectDetailView) projectDetailView.classList.add('hidden');
     if (appDock) appDock.style.display = 'none';
 
-    history.pushState(null, '', '/page/projects.html');
+    history.pushState(null, '', 'projects.html');
 }
 
 function initializeProjectCalendar(projectId) {
@@ -253,7 +253,7 @@ function showProjectDetail(id) {
     } 
 
     const urlParams = new URLSearchParams(window.location.search);
-    const newUrl = `/page/projects.html?viewProject=${id}`;
+    const newUrl = `projects.html?viewProject=${id}`;
 
     if (window.location.search !== `?viewProject=${id}`) {
         history.pushState({ projectId: id }, `Dự án: ${project.name}`, newUrl);

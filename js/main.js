@@ -1,9 +1,6 @@
-// --- File: main.js (Bản cập nhật cuối cùng, sửa lỗi logic render) ---
+// --- File: main.js (Bản cập nhật đầy đủ, sửa lỗi logic render) ---
 
-// Biến chứa địa chỉ server. Sau này khi có địa chỉ thật, chúng ta chỉ cần sửa ở đây.
-const API_BASE_URL = 'https://haibanhu-server.onrender.com';
-
-const socket = io(API_BASE_URL);
+const socket = io("http://localhost:3000");
 
 // --- GLOBAL STATE & CONFIG ---
 let currentUser = null;
@@ -48,7 +45,7 @@ async function fetchWithAuth(url, options = {}) {
     const token = localStorage.getItem('haiBanhU_Token');
     const headers = { 'Content-Type': 'application/json', ...options.headers };
     if (token) { headers['Authorization'] = `Bearer ${token}`; }
-    const response = await fetch(`${API_BASE_URL}${url}`, { ...options, headers });
+    const response = await fetch(`http://localhost:3000${url}`, { ...options, headers });
     if (response.status === 401 || response.status === 403) { handleLogout(); throw new Error("Phiên đăng nhập không hợp lệ hoặc đã hết hạn."); }
     if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.message || `Lỗi HTTP: ${response.status}`); }
     const contentType = response.headers.get("content-type");
@@ -204,11 +201,13 @@ async function updateUserOnServer(specificUpdate = false) {
 }
 
 function findUserById(userId) { if (!userId || !allUsers) return null; return allUsers.find(u => String(u.id) === String(userId)); }
+
 const handleLogout = () => { 
     if(eventCheckInterval) clearInterval(eventCheckInterval);
     localStorage.removeItem('haiBanhU_Token'); 
     sessionStorage.clear(); 
-    window.location.replace('/login.html?logout=true'); 
+    // <<< SỬA LỖI ĐIỀU HƯỚNG >>>
+    window.location.replace('../login.html?logout=true'); 
 };
 
 function initializeEventScheduler() {
@@ -274,7 +273,6 @@ async function handleFriendRequestAction(senderId, action) {
         await fetchWithAuth(`/api/friends/respond/${senderId}`, { method: 'POST', body: JSON.stringify({ action }) }); 
         showToast(`Đã ${action === 'accept' ? 'chấp nhận' : 'từ chối'} lời mời.`, 'success'); 
         
-        // Luôn fetch lại dữ liệu để đảm bảo nhất quán
         allUsers = await fetchWithAuth('/api/users');
         currentUser = allUsers.find(u => u.id === currentUser.id);
         saveCurrentUserToSession(currentUser);
@@ -297,7 +295,6 @@ async function handleProjectInviteAction(projectId, action) {
         await fetchWithAuth(`/api/projects/respond/${projectId}`, { method: 'POST', body: JSON.stringify({ action }) }); 
         showToast(`Đã ${action === 'accept' ? 'tham gia' : 'từ chối'} dự án!`, 'success'); 
         
-        // Luôn fetch lại dữ liệu để đảm bảo nhất quán
         allUsers = await fetchWithAuth('/api/users');
         currentUser = allUsers.find(u => u.id === currentUser.id);
         saveCurrentUserToSession(currentUser);
@@ -312,13 +309,36 @@ async function handleProjectInviteAction(projectId, action) {
     } 
 }
 
-async function handlePendingProjectInvite() { let inviteCode = sessionStorage.getItem('pendingProjectInvite'); if (!inviteCode) return; sessionStorage.removeItem('pendingProjectInvite'); showToast('Đang kiểm tra lời mời tham gia dự án...', 'info'); try { const result = await fetchWithAuth(`/api/projects/join/${inviteCode}`, { method: 'GET' }); if (result.isMember) { showToast(`Bạn đã là thành viên của dự án "${result.project.name}"!`, 'info'); window.location.href = `/page/projects.html?viewProject=${result.project.id}`; return; } const confirmed = await showConfirmationModal(`Bạn có muốn tham gia dự án "${result.project.name}" không?`, 'Xác nhận tham gia'); if (confirmed) { await handleProjectInviteAction(result.project.id, 'accept'); window.location.href = `/page/projects.html?viewProject=${result.project.id}`; } } catch (error) { showToast(error.message, 'error'); } }
+async function handlePendingProjectInvite() {
+    let inviteCode = sessionStorage.getItem('pendingProjectInvite');
+    if (!inviteCode) return;
+    sessionStorage.removeItem('pendingProjectInvite');
+    showToast('Đang kiểm tra lời mời tham gia dự án...', 'info');
+    try {
+        const result = await fetchWithAuth(`/api/projects/join/${inviteCode}`, { method: 'GET' });
+        if (result.isMember) {
+            showToast(`Bạn đã là thành viên của dự án "${result.project.name}"!`, 'info');
+            // <<< SỬA LỖI ĐIỀU HƯỚNG >>>
+            window.location.href = `projects.html?viewProject=${result.project.id}`;
+            return;
+        }
+        const confirmed = await showConfirmationModal(`Bạn có muốn tham gia dự án "${result.project.name}" không?`, 'Xác nhận tham gia');
+        if (confirmed) {
+            await handleProjectInviteAction(result.project.id, 'accept');
+            // <<< SỬA LỖI ĐIỀU HƯỚNG >>>
+            window.location.href = `projects.html?viewProject=${result.project.id}`;
+        }
+    } catch (error) {
+        showToast(error.message, 'error');
+    }
+}
 
 const handleGlobalSearch = (e) => {
     if (e.key === 'Enter') {
         const query = e.target.value.trim();
         if (!query) return;
-        window.location.href = `/page/search.html?q=${encodeURIComponent(query)}`;
+        // <<< SỬA LỖI ĐIỀU HƯỚNG >>>
+        window.location.href = `search.html?q=${encodeURIComponent(query)}`;
     }
 };
 
@@ -326,7 +346,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const initializeApp = async () => {
         const token = localStorage.getItem('haiBanhU_Token');
         currentUser = getCurrentUserFromSession();
-        if (!token || !currentUser) { if (!window.location.pathname.includes('login.html')) { window.location.replace('/login.html'); } return; }
+        if (!token || !currentUser) { 
+            // <<< SỬA LỖI ĐIỀU HƯỚNG >>>
+            // Sửa logic này trong file login.js và index.html vì main.js không chạy ở đó
+            if (!window.location.pathname.includes('login.html') && !window.location.pathname.endsWith('/')) { 
+                window.location.replace('../login.html'); 
+            } 
+            return; 
+        }
         try {
             allUsers = await fetchWithAuth('/api/users');
             currentUser = allUsers.find(u => u.id === currentUser.id); 
@@ -408,7 +435,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // <<< START SỬA LỖI: Luồng xử lý sự kiện real-time nhất quán >>>
     function setupRealtimeListeners() {
         socket.on('new_notification', (data) => {
             showToast(data.message, 'success');
@@ -439,12 +465,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
             showToast(data.message, 'info');
     
-            // Luôn fetch dữ liệu mới nhất từ server để đảm bảo tính nhất quán
             try {
                 const freshUsers = await fetchWithAuth('/api/users');
                 allUsers = freshUsers;
                 currentUser = allUsers.find(u => u.id === currentUser.id);
-                if (!currentUser) { // Nếu người dùng bị xóa hoặc có lỗi
+                if (!currentUser) { 
                     handleLogout();
                     return;
                 }
@@ -454,27 +479,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
     
-            // Render lại các thành phần UI cần thiết với dữ liệu mới và chính xác
             const currentPagePath = window.location.pathname;
 
             if (currentPagePath.includes('projects.html')) {
                 const projectDetailView = document.getElementById('project-detail');
-                // Quan trọng: Nếu đang xem chi tiết một dự án (bất kể dự án nào), hãy làm mới nó
                 if (projectDetailView && !projectDetailView.classList.contains('hidden') && currentProjectId) {
                     showProjectDetail(currentProjectId);
-                } else { // Nếu đang ở dashboard, render lại danh sách dự án
+                } else { 
                     if (typeof renderProjects === 'function') renderProjects();
                 }
             }
     
-            // Luôn cập nhật các thành phần có thể xuất hiện trên nhiều trang
             if (currentPagePath.includes('home.html')) {
                 if (typeof renderMyTasks === 'function') renderMyTasks();
                 if (typeof renderProjectFeed === 'function') renderProjectFeed();
             }
         });
     }
-    // <<< END SỬA LỖI >>>
 
     function setupGlobalListeners() {
         const searchBar = document.getElementById('main-search-bar');
@@ -526,7 +547,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (openPanel) {
                         toggleDockPanel(openPanel.id);
                     }
-                    window.location.href = '/page/projects.html';
+                    window.location.href = 'projects.html';
                 },
             };
             for (const [selector, handler] of Object.entries(handlersById)) { if (tClosest(selector)) { handler(); return; } }
@@ -540,7 +561,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     case 'accept-friend': case 'decline-friend': handleFriendRequestAction(senderId, action.split('-')[0]); break;
                     case 'accept-project': case 'decline-project': handleProjectInviteAction(projectId, action.split('-')[0]); break;
                     case 'add-friend': if (typeof sendFriendRequest === 'function') sendFriendRequest(targetId); break;
-                    case 'view-own-profile': window.location.href = `/page/profile.html`; break;
+                    case 'view-own-profile': window.location.href = `profile.html`; break;
                 }
                 return;
             }
