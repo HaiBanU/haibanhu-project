@@ -1,6 +1,8 @@
 // --- File: main.js (Bản cập nhật đầy đủ, sửa lỗi logic render) ---
 
-const socket = io("http://localhost:3000");
+const API_BASE_URL = 'https://haibanhu-server.onrender.com';
+
+const socket = io(API_BASE_URL);
 
 // --- GLOBAL STATE & CONFIG ---
 let currentUser = null;
