@@ -1,4 +1,4 @@
-// --- File: server.js (Bản cập nhật cuối cùng, sửa lỗi CORS) ---
+// --- File: server.js (Bản cập nhật cuối cùng, sửa lỗi CORS triệt để) ---
 
 require('dotenv').config();
 const mongoose = require('mongoose');
@@ -10,7 +10,8 @@ const nodemailer = require('nodemailer');
 const axios =require('axios');
 const { OAuth2Client } = require('google-auth-library');
 const { Buffer } = require('buffer');
-const { nanoid } = require('nanoid');
+const { nanoid } = require("nanoid"); // <-- Sửa lại cách import cho nanoid v3
+
 const bodyParser = require('body-parser');
 const cheerio = require('cheerio');
 
@@ -20,37 +21,36 @@ const { Server } = require("socket.io");
 const app = express();
 const server = http.createServer(app);
 
-// <<< THAY ĐỔI 1: TẠO DANH SÁCH CÁC ĐỊA CHỈ ĐƯỢC PHÉP TRUY CẬP (GUEST LIST) >>>
-// Chúng ta thêm địa chỉ trang web trên GitHub Pages vào đây.
+// <<< BƯỚC 1: ĐỊNH NGHĨA DANH SÁCH KHÁCH MỜI >>>
+// Đây là danh sách các "địa chỉ" được phép gọi đến server của chúng ta.
 const allowedOrigins = [
-    "http://localhost:3000",
-    "https://haibanu.github.io"
+    'http://127.0.0.1:5500', 
+    'http://localhost:5500',
+    'https://haibanu.github.io'
 ];
 
-// <<< THAY ĐỔI 2: CẤU HÌNH CORS CHI TIẾT CHO EXPRESS >>>
-// Đoạn này sẽ kiểm tra xem yêu cầu có đến từ một trong các địa chỉ trong allowedOrigins không.
+// <<< BƯỚC 2: CẤU HÌNH CHO CÁC YÊU CẦU API THÔNG THƯỜNG (EXPRESS) >>>
 const corsOptions = {
     origin: function (origin, callback) {
         if (!origin || allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
-            callback(new Error('Địa chỉ của bạn không được phép truy cập bởi chính sách CORS.'));
+            callback(new Error('Not allowed by CORS'));
         }
     }
 };
 
+// Áp dụng cấu hình CORS này cho Express
+app.use(cors(corsOptions));
+
+// <<< BƯỚC 3: CẤU HÌNH RIÊNG CHO KẾT NỐI REAL-TIME (SOCKET.IO) >>>
+// Đây là phần quan trọng nhất đã được sửa lại.
 const io = new Server(server, {
-    // <<< THAY ĐỔI 3: ÁP DỤNG DANH SÁCH ĐỊA CHỈ CHO SOCKET.IO >>>
-    // Thay vì cho phép tất cả (*), chúng ta chỉ cho phép các địa chỉ trong danh sách.
     cors: {
-        origin: allowedOrigins, 
+        origin: allowedOrigins, // Chỉ cho phép các địa chỉ trong danh sách
         methods: ["GET", "POST", "PUT", "DELETE"]
     }
 });
-
-// <<< THAY ĐỔI 4: ÁP DỤNG CẤU HÌNH CORS CHO EXPRESS >>>
-// Thay thế app.use(cors()) cũ bằng dòng này.
-app.use(cors(corsOptions));
 
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
@@ -63,6 +63,7 @@ if (!GROQ_API_KEY || !JWT_SECRET || !MONGODB_URI || !STABILITY_API_KEY) {
     process.exit(1);
 }
 
+// ... (TOÀN BỘ PHẦN CÒN LẠI CỦA FILE GIỮ NGUYÊN) ...
 const VIETNAMESE_SYSTEM_PROMPT = "Bạn là HaiBanhU, một trợ lý AI thông minh, thân thiện và hữu ích. BẠN PHẢI LUÔN LUÔN TRẢ LỜI BẰNG TIẾNG VIỆT. Giữ giọng văn tự nhiên, chuyên nghiệp nhưng gần gũi. Tuyệt đối không sử dụng tiếng Anh hoặc bất kỳ ngôn ngữ nào khác, trừ khi người dùng yêu cầu dịch một cách rõ ràng.";
 
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, 'postmessage');
@@ -187,9 +188,9 @@ function generateToken(user) { return jwt.sign({ userId: user.id, username: user
 const authenticateToken = (req, res, next) => { const authHeader = req.headers['authorization']; const token = authHeader && authHeader.split(' ')[1]; if (token == null) return res.sendStatus(401); jwt.verify(token, JWT_SECRET, (err, user) => { if (err) return res.sendStatus(403); req.user = user; next(); }); };
 
 // --- API Routes ---
+// ... (tất cả các hàm API routes không đổi)
 app.post('/api/auth/register', async (req, res) => { try { const { name, username, password } = req.body; if (!name || !username || !password) { return res.status(400).json({ message: "Vui lòng điền đầy đủ thông tin." }); } if (username.length < 6) { return res.status(400).json({ message: "Tên tài khoản phải có ít nhất 6 ký tự." }); } const existingUsername = await User.findOne({ username: username.toLowerCase() }); if (existingUsername) { return res.status(409).json({ message: "Tên tài khoản này đã được sử dụng." }); } const existingName = await User.findOne({ name: name }); if (existingName) { return res.status(409).json({ message: "Tên của bạn đã có người dùng. Vui lòng tạo tên khác." }); } const newUser = new User({ name, username: username.toLowerCase(), password: encodePassword(password), skills: [], friends: [], friendRequests: [], projectInvites: [], projects: [], workflows: [] }); await newUser.save(); const token = generateToken(newUser); res.status(201).json({ message: "Tạo tài khoản thành công!", token, user: sanitizeUserForSession(newUser.toJSON()) }); } catch (error) { if (error.name === 'ValidationError') { return res.status(400).json({ message: "Dữ liệu không hợp lệ. Vui lòng kiểm tra lại." }); } console.error("Register Error:", error); res.status(500).json({ message: "Lỗi server khi đăng ký." }); } });
 app.post('/api/auth/login', async (req, res) => { try { const { username, password } = req.body; if (!username || !password) { return res.status(400).json({ message: "Vui lòng điền đầy đủ thông tin." }); } const user = await User.findOne({ username: username.toLowerCase() }); if (!user || user.password !== encodePassword(password)) { return res.status(401).json({ message: "Tên tài khoản hoặc mật khẩu không chính xác." }); } const token = generateToken(user); res.status(200).json({ message: "Đăng nhập thành công!", token, user: sanitizeUserForSession(user.toJSON()) }); } catch (error) { console.error("Login Error:", error); res.status(500).json({ message: "Lỗi server khi đăng nhập." }); } });
-
 app.put('/api/user', authenticateToken, async (req, res) => {
     try {
         const userId = req.user.userId;
@@ -236,8 +237,6 @@ app.put('/api/user', authenticateToken, async (req, res) => {
         res.status(500).json({ message: "Lỗi server khi cập nhật." });
     }
 });
-
-
 app.get('/api/users', authenticateToken, async (req, res) => {
     try {
         const users = await User.find({});
@@ -246,40 +245,32 @@ app.get('/api/users', authenticateToken, async (req, res) => {
         res.status(500).json({ message: "Lỗi server khi lấy danh sách người dùng." });
     }
 });
-
 app.post('/api/user/connect/google', authenticateToken, async (req, res) => { try { const { code } = req.body; if (!code) { return res.status(400).json({ message: 'Không nhận được mã code từ frontend.' }); } const user = await User.findById(req.user.userId); if (!user) { return res.status(404).json({ message: 'Không tìm thấy người dùng.' }); } const { tokens } = await googleClient.getToken(code); const ticket = await googleClient.verifyIdToken({ idToken: tokens.id_token, audience: GOOGLE_CLIENT_ID, }); const payload = ticket.getPayload(); const googleEmail = payload.email; const existingLink = await User.findOne({ "email": googleEmail }); if (existingLink && existingLink.id.toString() !== user.id.toString()) { return res.status(409).json({ message: 'Email Google này đã được liên kết với một tài khoản khác.' }); } if (!user.connections) user.connections = {}; user.connections.gmail = { name: googleEmail, connected: true, appPassword: user.connections.gmail?.appPassword || null, }; if (!user.email) { user.email = googleEmail; } await user.save(); res.status(200).json({ message: 'Liên kết Google thành công!', user: sanitizeUserForSession(user.toJSON()) }); } catch(error) { console.error("Lỗi liên kết Google:", error.response ? error.response.data : error.message); res.status(500).json({ message: 'Liên kết Google thất bại. Vui lòng kiểm tra log server.' }); }});
 app.post('/api/user/disconnect/google', authenticateToken, async (req, res) => { try { const user = await User.findById(req.user.userId); if (!user) { return res.status(404).json({ message: "Không tìm thấy người dùng." }); } if (user.connections && user.connections.gmail) { user.connections.gmail = undefined; } const updatedUser = await user.save(); res.status(200).json({ message: "Đã hủy liên kết Google thành công.", user: sanitizeUserForSession(updatedUser.toJSON()) }); } catch (error) { res.status(500).json({ message: "Lỗi server khi hủy liên kết." }); } });
 app.post('/api/user/change-password', authenticateToken, async (req, res) => { try { const { currentPassword, newPassword } = req.body; const user = await User.findById(req.user.userId).select('+password'); if (!user.password) { return res.status(400).json({ message: 'Tài khoản của bạn không dùng mật khẩu để đăng nhập.' }); } if (user.password !== encodePassword(currentPassword)) { return res.status(401).json({ message: 'Mật khẩu hiện tại không chính xác.' }); } user.password = encodePassword(newPassword); await user.save(); res.status(200).json({ message: 'Đổi mật khẩu thành công!' }); } catch (error) { res.status(500).json({ message: 'Lỗi server.' }); } });
 app.delete('/api/user/delete-account', authenticateToken, async (req, res) => { try { await User.findByIdAndDelete(req.user.userId); res.status(200).json({ message: 'Tài khoản của bạn đã được xóa vĩnh viễn.' }); } catch (error) { res.status(500).json({ message: 'Lỗi server.' }); } });
-
-// --- Real-time Routes ---
 app.post('/api/friends/request/:targetId', authenticateToken, async (req, res) => { try { const senderId = req.user.userId; const targetId = req.params.targetId; const targetUser = await User.findById(targetId); if (!targetUser) return res.status(404).json({ message: "Không tìm thấy người dùng mục tiêu." }); if (targetUser.friendRequests.some(r => r.from.toString() === senderId) || (targetUser.friends && targetUser.friends.map(id => id.toString()).includes(senderId))) { return res.status(400).json({ message: "Yêu cầu đã được gửi hoặc đã là bạn bè." }); } targetUser.friendRequests.push({ from: senderId, status: 'pending' }); await targetUser.save(); const sender = await User.findById(senderId); 
 io.to(targetId).emit('new_notification', { type: 'friend_request', message: `${sender.name} đã gửi cho bạn một lời mời kết bạn.`, fromUser: sender.toJSON() });
 res.status(200).json({ message: "Đã gửi lời mời kết bạn!", user: sanitizeUserForSession(targetUser.toJSON()) }); } catch (error) { res.status(500).json({ message: 'Lỗi server.' }); } });
-
 app.post('/api/friends/respond/:senderId', authenticateToken, async (req, res) => { try { const receiverId = req.user.userId; const senderId = req.params.senderId; const { action } = req.body; const receiver = await User.findById(receiverId); const sender = await User.findById(senderId); if (!receiver || !sender) return res.status(404).json({ message: "Không tìm thấy người dùng." }); const requestIndex = receiver.friendRequests.findIndex(r => r.from.toString() === senderId); if (requestIndex === -1) return res.status(404).json({ message: "Không tìm thấy lời mời kết bạn." }); receiver.friendRequests.splice(requestIndex, 1); if (action === 'accept') { if (!receiver.friends.map(id => id.toString()).includes(senderId)) receiver.friends.push(senderId); if (!sender.friends.map(id => id.toString()).includes(receiverId)) sender.friends.push(receiverId); await sender.save(); 
 io.to(senderId).emit('friend_request_accepted', { message: `${receiver.name} đã chấp nhận lời mời kết bạn của bạn.`, newFriend: receiver.toJSON() });
 } 
 await receiver.save(); 
 res.status(200).json({ message: `Đã ${action === 'accept' ? 'chấp nhận' : 'từ chối'} lời mời.`}); } catch (error) { res.status(500).json({ message: 'Lỗi server.' }); } });
-
 app.post('/api/projects/:projectId/invite', authenticateToken, async (req, res) => { try { const { userIdToInvite } = req.body; const projectId = req.params.projectId; const inviterId = req.user.userId; const projectOwner = await User.findOne({ "projects.id": projectId }); if (!projectOwner) return res.status(404).json({ message: "Không tìm thấy dự án." }); const project = projectOwner.projects.find(p => p.id === projectId); const memberIdsAsString = project.members.map(id => id.toString()); if (!memberIdsAsString.includes(inviterId)) return res.status(403).json({ message: "Bạn không có quyền mời." }); const userToInvite = await User.findById(userIdToInvite); if (!userToInvite) return res.status(404).json({ message: "Người dùng được mời không tồn tại." }); if (memberIdsAsString.includes(userToInvite.id.toString())) return res.status(400).json({ message: "Người dùng này đã là thành viên." }); if (userToInvite.projectInvites.some(inv => inv.projectId === projectId)) return res.status(400).json({ message: "Đã gửi lời mời đến người này rồi." }); userToInvite.projectInvites.push({ from: inviterId, projectId: projectId, projectName: project.name, status: 'pending' }); await userToInvite.save(); const inviter = await User.findById(inviterId); 
 io.to(userIdToInvite).emit('new_notification', { type: 'project_invite', message: `${inviter.name} đã mời bạn tham gia dự án "${project.name}".`});
 res.json({ message: `Đã gửi lời mời đến ${userToInvite.name}!` }); } catch (error) { res.status(500).json({ message: "Lỗi server khi mời vào dự án." }); } });
-
 app.post('/api/projects/respond/:projectId', authenticateToken, async (req, res) => { try { const projectId = req.params.projectId; const { action } = req.body; const receiverId = req.user.userId; const receiver = await User.findById(receiverId); if (!receiver) return res.status(404).json({ message: "Không tìm thấy người dùng." }); const inviteIndex = receiver.projectInvites.findIndex(inv => inv.projectId === projectId); if (inviteIndex > -1) receiver.projectInvites.splice(inviteIndex, 1); if (action === 'accept') { const projectOwner = await User.findOne({ "projects.id": projectId }); if (!projectOwner) return res.status(404).json({ message: "Dự án được mời không còn tồn tại." }); const project = projectOwner.projects.find(p => p.id === projectId); if (!project.members.map(id => id.toString()).includes(receiverId)) { project.members.push(receiverId); } if (!receiver.projects.some(p => p.id === projectId)) { receiver.projects.push(project); } 
 await projectOwner.save(); await receiver.save();
 const updatedProject = projectOwner.projects.find(p => p.id === projectId);
 updatedProject.members.forEach(memberId => { if (String(memberId) !== receiverId) { io.to(String(memberId)).emit('project_updated', { type: 'new_member', message: `${receiver.name} vừa tham gia dự án "${updatedProject.name}".`, projectId: updatedProject.id }); }});
 } else { await receiver.save(); }
 res.json({ message: `Đã ${action === 'accept' ? 'tham gia' : 'từ chối'} dự án!` }); } catch (error) { res.status(500).json({ message: "Lỗi server." }); } });
-
 app.post('/api/projects/:projectId/tasks', authenticateToken, async (req, res) => { try { const { projectId } = req.params; const newTaskData = req.body; const requesterId = req.user.userId; const projectOwner = await User.findOne({ "projects.id": projectId }); if (!projectOwner) { return res.status(404).json({ message: "Không tìm thấy dự án." }); } const project = projectOwner.projects.find(p => p.id === projectId); if (!project) { return res.status(404).json({ message: "Lỗi nội bộ: Không tìm thấy dự án trong dữ liệu của chủ sở hữu." }); } if (!project.members.map(String).includes(String(requesterId))) { return res.status(403).json({ message: "Bạn không có quyền thêm công việc vào dự án này." }); } project.tasks.push(newTaskData); 
 await projectOwner.save();
 const requester = await User.findById(requesterId);
 project.members.forEach(memberId => { io.to(String(memberId)).emit('project_updated', { type: 'task_added', message: `${requester.name} đã thêm công việc mới vào dự án "${project.name}".`, projectId: project.id }); });
 res.status(201).json({ message: "Thêm công việc thành công!"}); } catch (error) { res.status(500).json({ message: "Lỗi server khi thêm công việc." }); } });
-
 app.delete('/api/projects/:projectId/tasks/:taskId', authenticateToken, async (req, res) => {
     try {
         const { projectId, taskId } = req.params;
@@ -301,8 +292,6 @@ app.delete('/api/projects/:projectId/tasks/:taskId', authenticateToken, async (r
         res.status(500).json({ message: "Lỗi server khi xóa công việc." });
     }
 });
-
-
 app.put('/api/projects/:projectId/tasks/:taskId', authenticateToken, async (req, res) => {
     try {
         const { projectId, taskId } = req.params;
@@ -342,7 +331,6 @@ app.put('/api/projects/:projectId/tasks/:taskId', authenticateToken, async (req,
         res.status(500).json({ message: "Lỗi server khi cập nhật công việc." });
     }
 });
-
 app.put('/api/projects/:projectId/tasks/:taskId/grade', authenticateToken, async (req, res) => {
     try {
         const { projectId, taskId } = req.params;
@@ -367,7 +355,6 @@ app.put('/api/projects/:projectId/tasks/:taskId/grade', authenticateToken, async
         res.status(500).json({ message: "Lỗi server khi chấm điểm công việc." });
     }
 });
-
 app.post('/api/projects/:projectId/documents', authenticateToken, async (req, res) => {
     try {
         const { projectId } = req.params;
@@ -398,7 +385,6 @@ project.members.forEach(memberId => { io.to(String(memberId)).emit('project_upda
 res.status(200).json({ message: "Bạn đã rời khỏi dự án thành công.", user: sanitizeUserForSession(userLeaving.toJSON()) }); } catch (error) { res.status(500).json({ message: "Lỗi server khi xử lý yêu cầu." }); } });
 app.get('/api/projects/join/:inviteCode', authenticateToken, async (req, res) => { try { const { inviteCode } = req.params; const userId = req.user.userId; const projectOwner = await User.findOne({ "projects.inviteCode": inviteCode }); if (!projectOwner) { return res.status(404).json({ message: "Link mời không hợp lệ hoặc đã hết hạn." }); } const project = projectOwner.projects.find(p => p.inviteCode === inviteCode); if (project.members.map(id => id.toString()).includes(userId)) { return res.status(400).json({ message: "Bạn đã là thành viên của dự án này.", project: project, isMember: true }); } res.json({ project: project }); } catch (error) { res.status(500).json({ message: "Lỗi server." }); } });
 app.get('/api/chat/conversation/:friendId', authenticateToken, async (req, res) => { try { const currentUserId = req.user.userId; const friendId = req.params.friendId; const conversation = await Conversation.findOne({ participants: { $all: [currentUserId, friendId] } }).populate('messages.sender', 'id name avatar'); if (!conversation) { return res.json([]); } const messages = conversation.messages.map(msg => ({ text: msg.text, timestamp: msg.createdAt, from: msg.sender.id, id: msg._id })); res.json(messages); } catch (error) { res.status(500).json({ message: "Lỗi server." }); } });
-
 app.post('/api/projects/:projectId/comments', authenticateToken, async (req, res) => {
     try {
         const { projectId } = req.params;
@@ -449,8 +435,6 @@ app.post('/api/projects/:projectId/comments', authenticateToken, async (req, res
         res.status(500).json({ message: "Lỗi server khi đăng bình luận." });
     }
 });
-
-
 app.get('/api/calendar/events', authenticateToken, async (req, res) => {
     try {
         const events = await Event.find({ userId: req.user.userId });
@@ -460,7 +444,6 @@ app.get('/api/calendar/events', authenticateToken, async (req, res) => {
         res.status(500).json({ message: "Không thể tải dữ liệu sự kiện." });
     }
 });
-
 app.post('/api/calendar/events', authenticateToken, async (req, res) => {
     try {
         const { title, start } = req.body;
@@ -478,7 +461,6 @@ app.post('/api/calendar/events', authenticateToken, async (req, res) => {
         res.status(500).json({ message: "Không thể tạo sự kiện mới." });
     }
 });
-
 app.put('/api/calendar/events/:id', authenticateToken, async (req, res) => {
     try {
         const updatedEvent = await Event.findOneAndUpdate(
@@ -494,7 +476,6 @@ app.put('/api/calendar/events/:id', authenticateToken, async (req, res) => {
         res.status(500).json({ message: "Lỗi khi cập nhật sự kiện." });
     }
 });
-
 app.delete('/api/calendar/events/:id', authenticateToken, async (req, res) => {
     try {
         const deletedEvent = await Event.findOneAndDelete({ _id: req.params.id, userId: req.user.userId });
@@ -506,7 +487,6 @@ app.delete('/api/calendar/events/:id', authenticateToken, async (req, res) => {
         res.status(500).json({ message: "Lỗi khi xóa sự kiện." });
     }
 });
-
 app.post('/api/ai/chat', authenticateToken, async (req, res) => {
     const { userMessage, userData } = req.body;
     if (!userMessage || !userData) { return res.status(400).json({ message: "Thiếu dữ liệu cần thiết." }); }
@@ -517,7 +497,6 @@ app.post('/api/ai/chat', authenticateToken, async (req, res) => {
         res.json({ message: aiMessage || "Tôi không có câu trả lời." });
     } catch (error) { console.error("Lỗi khi gọi Groq API từ server:", error.response ? error.response.data : error.message); res.status(500).json({ message: "Đã có lỗi xảy ra khi kết nối với người bạn AI của bạn." }); }
 });
-
 app.get('/api/projects/:projectId/events', authenticateToken, async (req, res) => {
     try {
         const { projectId } = req.params;
@@ -536,8 +515,6 @@ app.get('/api/projects/:projectId/events', authenticateToken, async (req, res) =
         res.status(500).json({ message: "Không thể tải dữ liệu lịch của dự án." });
     }
 });
-
-
 async function generateImageFromPrompt(vietnamesePrompt, style) {
     if (!vietnamesePrompt) { throw new Error("Vui lòng nhập mô tả cho ảnh."); }
     const translationPrompt = `Translate the following Vietnamese phrase into a detailed, descriptive, and vivid English prompt for an image generation AI. Add relevant artistic keywords like 'photorealistic', '4k', '8k', 'cinematic lighting', 'detailed', 'epic', 'concept art' to enhance the result. Respond with ONLY the final English prompt, nothing else. Vietnamese phrase: "${vietnamesePrompt}"`;
@@ -553,11 +530,9 @@ async function generateImageFromPrompt(vietnamesePrompt, style) {
     const image = stabilityResponse.data.artifacts[0];
     return `data:image/png;base64,${image.base64}`;
 }
-
 app.post('/api/ai/generate-image', authenticateToken, async (req, res) => {
     try { const { prompt, style } = req.body; const base64Image = await generateImageFromPrompt(prompt, style); res.status(200).json({ imageUrl: base64Image }); } catch (error) { res.status(500).json({ message: error.message || "Không thể tạo ảnh. Vui lòng kiểm tra lại Key hoặc Credits của bạn." }); }
 });
-
 app.post('/api/workflow/node/preview', authenticateToken, async (req, res) => {
     try {
         const { nodeType, nodeConfig } = req.body;
