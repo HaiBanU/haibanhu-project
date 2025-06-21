@@ -179,3 +179,44 @@ body.dark-mode .feature-section { background-color: var(--card-background-color)
 @media (max-width: 600px) {
     .page-header-banner { flex-direction: column; text-align: center; gap: 1rem; }
 }
+/* ==========================================================================
+   MEDIA QUERIES FOR MOBILE - BẮT ĐẦU PHẦN RESPONSIVE
+   ========================================================================== */
+@media (max-width: 900px) {
+    /* Ẩn chữ trong thanh điều hướng, chỉ để lại icon */
+    header nav .nav-item span,
+    header nav .nav-menu-toggle span,
+    header nav .user-menu-toggle span {
+        display: none;
+    }
+    header nav .nav-item,
+    header nav .nav-menu-toggle,
+    header nav .user-menu-toggle {
+        padding: 8px 12px;
+    }
+    /* Ẩn thanh tìm kiếm để tiết kiệm không gian */
+    #search-container {
+        display: none;
+    }
+    header .container {
+        gap: 10px;
+    }
+    /* Thay đổi bố cục cho các feature section ở trang chủ */
+    .feature-section {
+        grid-template-columns: 1fr;
+    }
+    .feature-section:nth-child(odd) .feature-image {
+        order: 0; /* Đưa ảnh lên trên */
+    }
+}
+
+@media (max-width: 600px) {
+    .page-header-banner {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    header .logo span {
+        display: none; /* Ẩn chữ HaiBanhU cạnh logo */
+    }
+}

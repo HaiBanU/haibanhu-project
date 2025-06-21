@@ -523,3 +523,34 @@ body.dark-mode .selected-assignees {
 #project-comment-form button[type="submit"] {
     color: var(--primary-color);
 }
+/* ==========================================================================
+   PROJECTS MEDIA QUERIES
+   ========================================================================== */
+@media (max-width: 900px) {
+    /* Cho phép cuộn ngang trên bảng Kanban */
+    #project-tab-tasks {
+        padding: 10px 15px 20px 15px;
+        position: relative;
+    }
+
+    .task-board {
+       justify-content: flex-start; /* Căn các cột về bên trái */
+       padding: 0 5px;
+    }
+    
+    /* Thêm một chỉ báo trực quan cho người dùng biết là có thể cuộn */
+    #project-tab-tasks::after {
+        content: '⟷ Cuộn ngang để xem thêm';
+        position: sticky;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: var(--primary-color);
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        opacity: 0.8;
+    }
+}

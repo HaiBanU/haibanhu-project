@@ -243,3 +243,17 @@ body.sidebar-collapsed #minimized-chats-container { right: 20px; }
 .minimized-chat-bubble:hover { transform: scale(1.1); }
 .minimized-chat-bubble img { width: 100%; height: 100%; object-fit: cover; }
 .minimized-chat-bubble i { color: var(--primary-color); }
+/* ==========================================================================
+   SIDEBAR MEDIA QUERIES
+   ========================================================================== */
+@media (max-width: 900px) {
+    #right-sidebar,
+    #toggle-sidebar-btn {
+        display: none !important; /* Hoàn toàn ẩn sidebar và nút toggle trên mobile */
+    }
+    
+    /* Xóa khoảng đệm bên phải của main content */
+    body:not(.sidebar-collapsed) main {
+        padding-right: 0;
+    }
+}
