@@ -1,7 +1,8 @@
 // --- File: main.js (Bản cập nhật đầy đủ, sửa lỗi logic render) ---
 
-const SERVER_URL = 'https://haibanu-server.onrender.com'; // <--- THAY ĐỊA CHỈ SERVER RENDER CỦA BẠN VÀO ĐÂY
-const socket = io(SERVER_URL);
+const API_BASE_URL = 'https://haibanhu-server.onrender.com';
+
+const socket = io(API_BASE_URL);
 
 // --- GLOBAL STATE & CONFIG ---
 let currentUser = null;
@@ -46,7 +47,7 @@ async function fetchWithAuth(url, options = {}) {
     const headers = { 'Content-Type': 'application/json', ...options.headers };
     if (token) { headers['Authorization'] = `Bearer ${token}`; }
     // THAY THẾ BẰNG DÒNG NÀY
-    const response = await fetch(`${SERVER_URL}${url}`, { ...options, headers });
+    const response = await fetch(`${API_BASE_URL}${url}`, { ...options, headers });
     if (response.status === 401 || response.status === 403) { handleLogout(); throw new Error("Phiên đăng nhập không hợp lệ hoặc đã hết hạn."); }
     if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.message || `Lỗi HTTP: ${response.status}`); }
     const contentType = response.headers.get("content-type");
