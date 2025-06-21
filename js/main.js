@@ -45,14 +45,14 @@ async function fetchWithAuth(url, options = {}) {
     const token = localStorage.getItem('haiBanhU_Token');
     const headers = { 'Content-Type': 'application/json', ...options.headers };
     if (token) { headers['Authorization'] = `Bearer ${token}`; }
-    const response = await fetch(`https://haibanhu-server.onrender.com${url}`, { ...options, headers });
+    // THAY THẾ BẰNG DÒNG NÀY
+    const response = await fetch(`${SERVER_URL}${url}`, { ...options, headers });
     if (response.status === 401 || response.status === 403) { handleLogout(); throw new Error("Phiên đăng nhập không hợp lệ hoặc đã hết hạn."); }
     if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.message || `Lỗi HTTP: ${response.status}`); }
     const contentType = response.headers.get("content-type");
     if (contentType && contentType.indexOf("application/json") !== -1) { return response.json(); }
     return null;
 }
-
 function showToast(message, type = 'info', duration = 4000) { 
     const container = document.getElementById('toast-container'); 
     if (!container) return; 
