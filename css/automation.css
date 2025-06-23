@@ -1,0 +1,368 @@
+/* --- START OF FILE css/automation.css (CẬP NHẬT CÁCH MẠNG) --- */
+
+/* ==========================================================================
+   AUTOMATION LIST VIEW
+   ========================================================================== */
+.automation-config-details { background-color: var(--card-background-color); border: 1px solid var(--border-color); border-radius: var(--border-radius); margin-bottom: 2rem; transition: background-color 0.2s; }
+.automation-config-details[open] { background-color: var(--background-color); }
+.automation-config-summary { display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; cursor: pointer; list-style: none; }
+.automation-config-summary::-webkit-details-marker { display: none; }
+.automation-config-summary h3 { margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
+.summary-arrow { font-size: 14px; color: var(--text-light-color); transition: transform 0.3s; }
+.automation-config-details[open] > .automation-config-summary .summary-arrow { transform: rotate(180deg); }
+.automation-config-content { padding: 0px 25px 20px 25px; border-top: 1px solid var(--border-color); }
+.config-section h4 { margin: 20px 0 10px 0; display: flex; align-items: center; gap: 8px; }
+.config-section .form-help-text { font-size: 13px; margin-bottom: 15px; white-space: normal; }
+.connection-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; background-color: var(--background-color); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 10px; }
+.connection-info { display: flex; align-items: center; gap: 12px; }
+.connection-info i { font-size: 18px; width: 20px; text-align: center; }
+.connection-info i.fa-circle-check { color: var(--success-color); }
+.connection-item .btn-sm { padding: 5px 12px; font-size: 14px; flex-shrink: 0;}
+
+.workflow-card .app-icon.small { width: 20px; height: 20px; font-size: 12px; }
+.workflow-card-footer { font-size: 14px; display: flex; align-items: center; gap: 8px; color: var(--text-light-color); }
+.workflow-card-footer .app-icon { border: 2px solid var(--card-background-color); }
+
+
+/* ==========================================================================
+   AUTOMATION BUILDER (GIAO DIỆN MỚI)
+   ========================================================================== */
+
+#automation-view.builder-mode {
+    padding-top: 1rem;
+    padding-bottom: 0;
+    max-width: none;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+#automation-builder-view {
+    position: relative; /* Cho banner lỗi */
+}
+
+#workflow-error-banner {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--error-color);
+    color: white;
+    padding: 12px 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-hover);
+    z-index: 1200;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    animation: fadeIn 0.3s;
+}
+#close-error-banner-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    opacity: 0.7;
+}
+#close-error-banner-btn:hover {
+    opacity: 1;
+}
+
+.automation-canvas-wrapper {
+    height: calc(100vh - 69px - 1rem - 30px); /* Header - Padding trên - Không gian cho Dock */
+    width: 100%;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    position: relative;
+    cursor: grab;
+    background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+body.dark-mode .automation-canvas-wrapper {
+    background-image: radial-gradient(#4b5567 1px, transparent 1px);
+}
+.automation-canvas-wrapper.is-panning { cursor: grabbing; }
+
+#automation-canvas {
+    position: relative;
+    width: 5000px;
+    height: 5000px;
+    transform-origin: 0 0;
+    background-color: transparent;
+    background-image: none;
+}
+
+.workflow-node {
+    width: 90px; height: 90px; border-radius: 50%;
+    background-color: var(--card-background-color);
+    border: 3px solid var(--border-color);
+    box-shadow: var(--shadow);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: move;
+    transition: all 0.2s ease-in-out;
+    position: absolute; z-index: 10;
+}
+.workflow-node:hover { transform: scale(1.05); border-color: var(--primary-color); }
+.workflow-node.is-running {
+    animation: node-running-glow 2s ease-in-out infinite;
+    border-color: var(--info-color);
+}
+.workflow-node.is-success {
+    border-color: var(--success-color);
+    box-shadow: 0 0 15px var(--success-color);
+}
+.workflow-node.is-error {
+    border-color: var(--error-color);
+    box-shadow: 0 0 15px var(--error-color);
+}
+
+.workflow-node .node-icon { width: 54px; height: 54px; border-radius: 50%; color: white; font-size: 26px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; padding: 12px; }
+.workflow-node .node-icon img { width: 100%; height: 100%; object-fit: contain; }
+
+.workflow-node .node-label { position: absolute; top: calc(100% + 10px); font-size: 14px; font-weight: 500; text-align: center; width: 150px; left: 50%; transform: translateX(-50%); color: var(--text-light-color); }
+.node-config-status { position: absolute; top: 0px; right: 0px; width: 24px; height: 24px; border-radius: 50%; background-color: var(--error-color); border: 3px solid var(--card-background-color); display: flex; align-items: center; justify-content: center; }
+.node-config-status.configured { background-color: var(--success-color); }
+.node-config-status.not-configured::after { content: "!"; color: white; font-weight: bold; font-size: 14px; }
+.delete-node-from-canvas-btn { position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%) scale(0); width: 30px; height: 30px; border-radius: 50%; background-color: var(--error-color); color: white; border: 2px solid var(--card-background-color); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s ease-in-out; z-index: 11; }
+.workflow-node:hover .delete-node-from-canvas-btn { transform: translateX(-50%) scale(1); }
+
+.add-node-button {
+    position: absolute;
+    width: 44px; height: 44px; border-radius: 50%;
+    background-color: var(--card-background-color);
+    border: 2px solid var(--border-color);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-light-color); font-size: 22px; cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    box-shadow: var(--shadow); flex-shrink: 0; z-index: 10;
+}
+.add-node-button:hover { background-color: var(--primary-color); border-color: var(--primary-color); border-style: solid; color: white; transform: scale(1.1); }
+.add-node-button.initial {
+    width: 90px;
+    height: 90px;
+    font-size: 40px;
+    border-style: dashed;
+}
+.add-node-button.initial:hover {
+    border-style: solid;
+}
+
+#automation-dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1100; }
+#automation-dock-buttons { display: flex; gap: 10px; padding: 8px; background-color: rgba(31, 41, 55, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 28px; box-shadow: var(--shadow-hover); }
+#automation-dock-buttons .btn { color: white; border: none; }
+#automation-dock-buttons .btn-secondary { background-color: rgba(255, 255, 255, 0.15); }
+#automation-dock-buttons .btn-secondary:hover { background-color: rgba(255, 255, 255, 0.25); }
+
+.leader-line { z-index: 5; }
+
+/* <<< START: CSS MỚI CHO MODULE PICKER (MAKE.COM STYLE) >>> */
+#module-picker-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1500;
+}
+#module-picker-popover {
+    position: absolute; 
+    width: 400px;
+    background: var(--card-background-color);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-hover);
+    border-radius: var(--border-radius);
+    animation: fadeIn 0.2s ease-out;
+    overflow: hidden;
+    z-index: 20;
+}
+.module-picker-search {
+    position: relative;
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+.module-picker-search i {
+    position: absolute; left: 20px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light-color);
+}
+#module-search-input { width: 100%; padding-left: 35px; }
+
+#module-picker-list {
+    max-height: 350px;
+    overflow-y: auto;
+    padding: 10px;
+}
+.module-item {
+    display: flex; align-items: center; gap: 15px; padding: 10px;
+    border-radius: 8px; cursor: pointer; transition: background-color 0.2s;
+}
+.module-item:hover { background-color: var(--background-color); }
+.app-icon {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0; color: white;
+    background-color: #eee;
+    padding: 8px;
+}
+.app-icon img { width: 100%; height: 100%; object-fit: contain; }
+.app-icon i { color: var(--text-color); }
+body.dark-mode .app-icon i { color: white; }
+
+.module-item-info h4 { margin: 0; font-size: 1rem; }
+
+#module-picker-detail-view { padding: 10px; }
+.module-picker-detail-header {
+    display: flex; align-items: center; gap: 15px;
+    padding-bottom: 10px; margin-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+#module-picker-back-btn {
+    background: none; border: none; font-size: 1.2rem;
+    cursor: pointer; padding: 5px; color: var(--text-light-color);
+}
+.app-info { display: flex; align-items: center; gap: 10px; }
+#detail-app-icon { width: 32px; height: 32px; }
+#detail-app-name { font-size: 1.1rem; margin: 0; }
+
+#module-picker-detail-list h5 {
+    font-size: .8rem; text-transform: uppercase; color: var(--text-light-color);
+    margin: 15px 10px 5px;
+}
+.module-detail-item {
+    padding: 10px; border-radius: 8px; cursor: pointer;
+    transition: background-color 0.2s; font-weight: 500;
+}
+.module-detail-item:hover { background-color: var(--background-color); }
+.module-detail-item.trigger { color: var(--secondary-color); }
+.module-detail-item.action { color: var(--primary-color); }
+
+/* <<< END: CSS MỚI CHO MODULE PICKER >>> */
+
+/* <<< START: CSS MỚI CHO MODAL CẤU HÌNH >>> */
+#action-config-modal.modal-lg { max-width: 600px !important; }
+
+/* Main layout of the config modal */
+#action-config-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+#action-config-content .form-actions {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.run-test-btn {
+    margin-right: auto;
+}
+#preview-output-container {
+    margin-top: 20px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 20px;
+}
+#preview-output-container h4 {
+    margin-bottom: 10px;
+    font-size: 1rem;
+    color: var(--text-light-color);
+}
+.json-preview {
+    background-color: var(--background-color);
+    border-radius: 8px;
+    padding: 15px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 350px;
+    overflow-y: auto;
+}
+body.dark-mode .json-preview {
+    background-color: #0d1117;
+}
+.json-preview img {
+    max-width: 100%;
+    border-radius: 8px;
+}
+
+
+/* Expression Input */
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* <<< SỬA LỖI: Bỏ nút + bên cạnh input >>> */
+.add-expression-btn {
+   display: none;
+}
+.config-input-field:focus + .add-expression-btn {
+    display: flex;
+}
+
+
+/* Expression Popover */
+.expression-popover {
+    position: absolute;
+    background: var(--card-background-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-hover);
+    z-index: 1800;
+    width: 350px;
+    max-height: 400px;
+    overflow-y: auto;
+    display: none;
+    padding: 10px;
+}
+.expression-popover.active {
+    display: block;
+    animation: fadeIn 0.2s ease-out;
+}
+.expression-popover h4 {
+    font-size: 1rem;
+    padding: 8px;
+    margin: 0 0 10px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+.expression-popover .expression-category {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-light-color);
+    padding: 8px;
+    margin-top: 5px;
+}
+.expression-item {
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+}
+.expression-item:hover {
+    background-color: var(--background-color);
+}
+.expression-item strong {
+    color: var(--primary-color);
+}
+.expression-item span {
+    color: var(--text-light-color);
+    font-style: italic;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+}
+
+.loader-container {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+/* <<< END: CSS MỚI CHO MODAL CẤU HÌNH >>> */

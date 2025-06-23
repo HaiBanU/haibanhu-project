@@ -1,0 +1,12 @@
+# Tệp môi trường chứa các khóa bí mật
+# TUYỆT ĐỐI KHÔNG ĐƯA TỆP NÀY LÊN GITHUB!
+.env
+
+# Thư mục chứa các thư viện đã tải về
+# Server sẽ tự cài đặt lại từ package.json
+/node_modules
+
+# Các tệp log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
